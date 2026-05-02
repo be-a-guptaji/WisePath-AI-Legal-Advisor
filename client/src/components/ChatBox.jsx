@@ -287,7 +287,7 @@ const ChatBox = () => {
         onSubmit={onSubmit}
         className="bg-primary/20 border-primary mx-auto flex w-full max-w-2xl items-center gap-4 rounded-full border p-3 pl-4 dark:border-[#80609F]/30 dark:bg-[#583C79]/30"
       >
-        <select
+        {/* <select
           onChange={(e) => setMode(e.target.value)}
           value={mode}
           className="pr-2 pl-3 text-sm outline-none"
@@ -298,13 +298,13 @@ const ChatBox = () => {
           <option className="dark:bg-purple-900" value="image">
             Image
           </option>
-        </select>
+        </select> */}
         <input
           onChange={(e) => setPrompt(e.target.value)}
           value={prompt}
           type="text"
           placeholder="Type your prompt here..."
-          className="w-full flex-1 text-sm outline-none"
+          className="w-full flex-1 text-sm outline-none px-4"
           required
         />
         <button type="submit" disabled={loading}>

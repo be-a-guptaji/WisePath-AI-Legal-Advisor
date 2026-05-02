@@ -37,7 +37,7 @@ const App = () => {
             <Routes>
               <Route path="/" element={<ChatBox />} />
               <Route path="/credits" element={<Credits />} />
-              <Route path="/community" element={<Community />} />
+              {/* <Route path="/community" element={<Community />} /> */}
             </Routes>
           </div>
         </div>

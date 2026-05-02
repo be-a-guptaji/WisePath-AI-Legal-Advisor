@@ -127,7 +127,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       </div>
 
       {/* Community Images */}
-      <div
+      {/* <div
         onClick={() => {
           navigate("/community");
           setIsMenuOpen(false);
@@ -142,7 +142,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         <div className="flex flex-col text-sm">
           <p>Community Images</p>
         </div>
-      </div>
+      </div> */}
 
       {/* Credit Purchases Option */}
       <div
@@ -156,7 +156,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         <div className="flex flex-col text-sm">
           <p>Credits : {user?.credits}</p>
           <p className="text-xs text-gray-400">
-            Purchase credits to use quickgpt
+            Purchase credits to use WisePath
           </p>
         </div>
       </div>
