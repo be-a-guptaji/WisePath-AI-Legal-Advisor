@@ -119,7 +119,7 @@ import Chat from "../models/Chat.js";
 import User from "../models/User.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const MODEL_NAME = "gemini-2.0-flash";
+const MODEL_NAME = "gemini-2.0-flash-lite";
 
 const SYSTEM_PROMPT =
   "You are WisePath, an AI legal advisor. Provide general legal information clearly and concisely. Always include a disclaimer that your responses do not constitute formal legal advice and users should consult a licensed attorney for their specific situation.";
