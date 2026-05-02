@@ -117,37 +117,28 @@
 
 import Chat from "../models/Chat.js";
 import User from "../models/User.js";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 
-const MODEL_NAME = "gemini-2.0-flash-lite";
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+const MODEL_NAME = "llama-3.3-70b-versatile"; // free, fast, high quality
 
 const SYSTEM_PROMPT =
   "You are WisePath, an AI legal advisor. Provide general legal information clearly and concisely. Always include a disclaimer that your responses do not constitute formal legal advice and users should consult a licensed attorney for their specific situation.";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Retry with exponential backoff on 429
-const callGeminiWithRetry = async (
-  history,
-  userPrompt,
-  retries = 3,
-  delayMs = 1000
-) => {
+const callGroqWithRetry = async (messages, retries = 3, delayMs = 1000) => {
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
-      const model = genAI.getGenerativeModel({
+      const response = await groq.chat.completions.create({
         model: MODEL_NAME,
-        systemInstruction: SYSTEM_PROMPT,
+        messages,
       });
-
-      const chat = model.startChat({ history });
-      const result = await chat.sendMessage(userPrompt);
-      return result.response.text();
+      return response.choices[0].message.content;
     } catch (error) {
       const isRateLimit =
         error?.status === 429 ||
         error?.message?.includes("429") ||
-        error?.message?.toLowerCase().includes("quota");
+        error?.message?.toLowerCase().includes("rate limit");
 
       if (isRateLimit && attempt < retries - 1) {
         console.warn(
@@ -159,17 +150,6 @@ const callGeminiWithRetry = async (
       }
     }
   }
-};
-
-// OpenAI role "assistant" → Gemini role "model"
-// OpenAI content string → Gemini parts array
-const toGeminiHistory = (messages) => {
-  return messages
-    .filter((m) => !m.isImage)
-    .map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
 };
 
 // ─── Text Message Controller ───────────────────────────────────────────────
@@ -193,8 +173,21 @@ export const textMessageController = async (req, res) => {
       return res.json({ success: false, message: "Chat not found" });
     }
 
-    const history = toGeminiHistory(chat.messages);
-    const replyText = await callGeminiWithRetry(history, prompt);
+    // Build conversation history — Groq uses OpenAI format natively
+    const historyMessages = chat.messages
+      .filter((m) => !m.isImage)
+      .map((m) => ({
+        role: m.role === "assistant" ? "assistant" : "user",
+        content: m.content,
+      }));
+
+    const apiMessages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...historyMessages,
+      { role: "user", content: prompt },
+    ];
+
+    const replyText = await callGroqWithRetry(apiMessages);
 
     const userMessage = {
       role: "user",
@@ -227,4 +220,13 @@ export const textMessageController = async (req, res) => {
   } catch (error) {
     return res.json({ success: false, message: error.message });
   }
+};
+
+// ─── Image Generation Controller (disabled) ───────────────────────────────
+
+export const imageMessageController = async (req, res) => {
+  return res.json({
+    success: false,
+    message: "Image generation is currently disabled",
+  });
 };
